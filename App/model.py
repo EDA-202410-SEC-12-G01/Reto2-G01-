@@ -50,8 +50,16 @@ def new_data_structs():
     manera vacía para posteriormente almacenar la información.
     """
     #TODO: Inicializar las estructuras de datos
-    pass
+    
+    data_struct = {"jobs":None,
+                    "employments_types":None,
+                    "multilocations":None,
+                    "skills":None}
 
+    data_struct["jobs"] = 
+    data_struct["employments_types"]
+    data_struct["multilocations"]
+    data_struct["skills"]
 
 # Funciones para agregar informacion al modelo
 

@@ -25,28 +25,77 @@ import model
 import time
 import csv
 
-
 """
 El controlador se encarga de mediar entre la vista y el modelo.
 """
-
+csv.field_size_limit(2147483647) 
 
 def new_controller():
     """
     Crea una instancia del modelo
     """
-    #TODO: Llamar la función del modelo que crea las estructuras de datos
-    pass
+    tipo_estructura = input("Ingrese el tipo de estructura (1 para CHAINING o 2 para PROBING): ")
+    factor_carga = input("Ingrese el factor de carga (1, 2, 3, o 4 para CHAINING; 1, 2, 3, o 4 para PROBING): ")
+    num_elementos = int(input("Ingrese la cantidad de elementos iniciales: "))
+
+    control = {
+        'model': None
+    }
+
+    control['model'] = model.new_data_structs(tipo_estructura, factor_carga, num_elementos)
+    return control
 
 
 # Funciones para la carga de datos
 
-def load_data(control, filename):
+def load_data(control):
     """
     Carga los datos del reto
     """
-    # TODO: Realizar la carga de datos
-    pass
+    data_structs = control['model'] 
+    message = """        Ingrese 1 si quiere cargar una muestra pequeña de los datos.
+        Ingrese 1 si quiere cargar el 10 porciento de los datos. 
+        Ingrese 2 si quiere cargar el 20 porciento de los datos.
+        Ingrese 3 si quiere cargar el 30 porciento de los datos 
+        Ingrese 4 si quiere cargar el 50 porciento de los datos.
+        Ingrese 5 si quiere cargar el 80 porciento de los datos 
+        Ingrese 6 si quiere cargar TODOS los datos. \n"""
+    data_size = int(input(message))
+
+    if data_size == 1:
+        file = "10-por"
+    elif data_size == 2:
+        file = "20-por"
+    elif data_size == 3:
+        file = "30-por"
+    elif data_size == 4:
+        file = "50-por"
+    elif data_size == 5:
+        file = "80-por"
+    elif data_size == 6:
+        file = "large"
+
+    jobs_by_date = load_job_by_date(data_structs, file)
+    employment_type = load_employment_type(data_structs, file)
+    return jobs_by_date, employment_type
+
+
+def load_job_by_date(data_structs, file):
+
+    input_file = csv.DictReader(open(cf.data_dir + f"{file}-jobs.csv", encoding='utf-8'),delimiter=";")
+    for job in input_file:
+        model.add_job_by_date(data_structs, job)
+    return model.data_size(data_structs["jobs_by_date"])
+
+def load_employment_type(data_structs, file):
+
+    input_file = csv.DictReader(open(cf.data_dir + f"{file}-employments_types.csv", encoding='utf-8'),delimiter=";")
+    for employment_type in input_file:
+        model.add_employment_type(data_structs, employment_type)
+    return model.data_size(data_structs["employments_types"])
+
+
+
 
 
 # Funciones de ordenamiento

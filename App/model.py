@@ -29,11 +29,14 @@ import config as cf
 from DISClib.ADT import list as lt
 from DISClib.ADT import stack as st
 from DISClib.ADT import queue as qu
+from DISClib.ADT import map as mp
+from DISClib.DataStructures import mapentry as me
 from DISClib.Algorithms.Sorting import shellsort as sa
 from DISClib.Algorithms.Sorting import insertionsort as ins
 from DISClib.Algorithms.Sorting import selectionsort as se
 from DISClib.Algorithms.Sorting import mergesort as merg
 from DISClib.Algorithms.Sorting import quicksort as quk
+from datetime import date 
 assert cf
 
 """
@@ -44,59 +47,107 @@ dos listas, una para los videos, otra para las categorias de los mismos.
 # Construccion de modelos
 
 
-def new_data_structs():
+def new_data_structs(tipo_estructura, factor_carga, num_elementos):
     """
     Inicializa las estructuras de datos del modelo. Las crea de
     manera vacía para posteriormente almacenar la información.
     """
     #TODO: Inicializar las estructuras de datos
     
-    data_struct = {"jobs":None,
+    data_struct = {"jobs_by_date":None,
                     "employments_types":None,
                     "multilocations":None,
                     "skills":None}
 
-    data_struct["jobs"] = 
-    data_struct["employments_types"]
-    data_struct["multilocations"]
-    data_struct["skills"]
-
-# Funciones para agregar informacion al modelo
-
-def add_data(data_structs, data):
-    """
-    Función para agregar nuevos elementos a la lista
-    """
-    #TODO: Crear la función para agregar elementos a una lista
-    pass
+    map_type = 'CHAINING' if tipo_estructura == '1' else 'PROBING'
 
 
-# Funciones para creacion de datos
+    if map_type == 'CHAINING':
+        if factor_carga == '1':
+            factor_carga = 2  
+        elif factor_carga == '2' :
+            factor_carga = 4
+        elif factor_carga == '3' :
+            factor_carga = 6 
+        else: factor_carga = 8
 
-def new_data(id, info):
-    """
-    Crea una nueva estructura para modelar los datos
-    """
-    #TODO: Crear la función para estructurar los datos
-    pass
+    elif map_type == 'PROBING':
+        if factor_carga == '1':
+            factor_carga = 0.1
+        if factor_carga == '2':
+            factor_carga = 0.5
+        if factor_carga == '4':
+            factor_carga = 0.7
+        else: factor_carga = 0.9
+        
+    data_struct["jobs_by_date"] = mp.newMap(numelements=num_elementos, maptype=map_type, loadfactor=factor_carga)
+    data_struct["employments_types"]  = mp.newMap(numelements=num_elementos, maptype=map_type, loadfactor=factor_carga)
+    data_struct["multilocations"]  = mp.newMap(numelements=num_elementos, maptype=map_type, loadfactor=factor_carga)
+    data_struct["skills"]  = mp.newMap(numelements=num_elementos, maptype=map_type, loadfactor=factor_carga)
+    
+    return data_struct
+
+##ADD_DATA##
+def add_job_by_date(data_struct,data):
+    job= new_job_by_date(data)
+    mp.put(data_struct["jobs_by_date"],data["published_at"],job)
+    return data_struct
+
+def add_employment_type(data_struct,data):
+    employment_type= new_employment_type(data)
+    mp.put(data_struct["employments_types"],data["id"],employment_type)
+    return data_struct
 
 
-# Funciones de consulta
 
-def get_data(data_structs, id):
-    """
-    Retorna un dato a partir de su ID
-    """
-    #TODO: Crear la función para obtener un dato de una lista
-    pass
 
+
+
+##NEW DATA##
+def new_job_by_date(data):
+    job = {"title":data["title"],
+           "street":data["street"],
+           "city":data["city"],
+           "country_code":data["country_code"],
+           "address_text":data["address_text"],
+           "marker_icon":data["marker_icon"],
+           "workplace_type":data["workplace_type"],
+           "company_name":data["company_name"],
+           "company_url":data["company_url"],
+           "company_size":data["company_size"],
+           "experience_level":data["experience_level"],
+           "published_at":data["published_at"],
+           "remote_interview":data["remote_interview"],
+           "open_to_hire_ukrainians":data["open_to_hire_ukrainians"],
+           "id":data["id"],
+           "display_offer":data["display_offer"]}
+    return job
+
+def new_employment_type(data):
+    employment_type={"type":data["type"],
+                     "id":data["id"],
+                     "currency_salary":data["currency_salary"],
+                     "salary_from":data["salary_from"],
+                     "salary_to":data["salary_to"]}
+    return employment_type
+
+def new_multilocation(data):
+    multilocation={"city":data["city"],
+                     "street":data["street"],
+                     "id":data["id"],}
+    return multilocation
+
+def new_skill(data):
+    skill={"name":data["name"],
+           "level":data["level"],
+           "id":data["id"]}
+    return skill
 
 def data_size(data_structs):
-    """
-    Retorna el tamaño de la lista de datos
-    """
-    #TODO: Crear la función para obtener el tamaño de una lista
-    pass
+    return mp.size(data_structs)
+
+
+
 
 
 def req_1(data_structs):

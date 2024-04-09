@@ -98,7 +98,15 @@ def add_employment_type(data_struct,data):
     mp.put(data_struct["employments_types"],data["id"],employment_type)
     return data_struct
 
+def add_multilocations(data_struct,data):
+    multilocation= new_multilocation(data)
+    mp.put(data_struct["multilocations"],data["id"],multilocation)
+    return data_struct
 
+def add_skills(data_struct,data):
+    skill= new_skill(data)
+    mp.put(data_struct["skills"],data["id"],skill)
+    return data_struct
 
 
 

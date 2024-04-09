@@ -77,7 +77,9 @@ def load_data(control):
 
     jobs_by_date = load_job_by_date(data_structs, file)
     employment_type = load_employment_type(data_structs, file)
-    return jobs_by_date, employment_type
+    multilocations = load_multilocations(data_structs,file)
+    skills = load_skills(data_structs,file)
+    return jobs_by_date,employment_type,multilocations,skills
 
 
 def load_job_by_date(data_structs, file):
@@ -93,6 +95,20 @@ def load_employment_type(data_structs, file):
     for employment_type in input_file:
         model.add_employment_type(data_structs, employment_type)
     return model.data_size(data_structs["employments_types"])
+
+def load_multilocations(data_structs, file):
+
+    input_file = csv.DictReader(open(cf.data_dir + f"{file}-multilocations.csv", encoding='utf-8'),delimiter=";")
+    for multilocation in input_file:
+        model.add_multilocations(data_structs, multilocation)
+    return model.data_size(data_structs["multilocations"])
+
+def load_skills(data_structs, file):
+
+    input_file = csv.DictReader(open(cf.data_dir + f"{file}-skills.csv", encoding='utf-8'),delimiter=";")
+    for skill in input_file:
+        model.add_skills(data_structs, skill)
+    return model.data_size(data_structs["skills"])
 
 
 

@@ -195,12 +195,29 @@ def req_1(data_structs, n_jobs, Country_Code, exp_lvl):
     return length, result_jobs, n_jobs
 
 
-def req_2(data_structs):
-    """
-    Función que soluciona el requerimiento 2
-    """
-    # TODO: Realizar el requerimiento 2
-    pass
+def req_2(data_structs, n_jobs, city):
+    jobs_map = data_structs['jobs_by_id'] 
+    llave_job = mp.get(jobs_map, city)
+    jobs = me.getValue(llave_job)
+    quk.sort(jobs, compare_jobs_req2)
+    if lt.size(jobs) > 6:
+        lista_jobs= lt.subList(jobs, 1, 3)
+        for job in lt.iterator(lt.subList(jobs,lt.size(jobs)-2 , 3)):
+            lt.addLast(lista_jobs, job)
+    else:
+        lista_jobs = goles
+
+    if n_jobs < lt.size(lista_jobs):
+        lista_jobs_final = lt.subList(lista_jobs, 1, n_jobs)
+    else:
+        lista_jobs_final = lista_jobs
+
+    count = 0
+    for gol in lt.iterator(lista_jobs_final) :
+        if gol["city"] == city:
+            count += 1
+
+    return lista_jobs_final , lt.size(lista_jobs_final) , count , mp.size(jobs_map)
 
 
 def req_3(data_structs):

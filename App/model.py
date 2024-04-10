@@ -205,7 +205,7 @@ def req_2(data_structs, n_jobs, city):
         for job in lt.iterator(lt.subList(jobs,lt.size(jobs)-2 , 3)):
             lt.addLast(lista_jobs, job)
     else:
-        lista_jobs = goles
+        lista_jobs = jobs
 
     if n_jobs < lt.size(lista_jobs):
         lista_jobs_final = lt.subList(lista_jobs, 1, n_jobs)
@@ -213,8 +213,8 @@ def req_2(data_structs, n_jobs, city):
         lista_jobs_final = lista_jobs
 
     count = 0
-    for gol in lt.iterator(lista_jobs_final) :
-        if gol["city"] == city:
+    for job in lt.iterator(lista_jobs_final) :
+        if job["city"] == city:
             count += 1
 
     return lista_jobs_final , lt.size(lista_jobs_final) , count , mp.size(jobs_map)

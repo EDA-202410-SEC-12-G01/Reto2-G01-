@@ -45,8 +45,6 @@ dos listas, una para los videos, otra para las categorias de los mismos.
 """
 
 # Construccion de modelos
-
-
 def new_data_structs(tipo_estructura, factor_carga, num_elementos):
     """
     Inicializa las estructuras de datos del modelo. Las crea de
@@ -117,8 +115,6 @@ def add_skills(data_struct,data):
     return data_struct
 
 
-
-
 ##NEW DATA##
 def new_job_by_date(data):
     job = {"title":data["title"],
@@ -162,10 +158,7 @@ def new_skill(data):
 def data_size(data_structs):
     return mp.size(data_structs)
 
-
-
-
-
+#REQS
 def req_1(data_structs, n_jobs, Country_Code, exp_lvl):
     jobs = mp.newMap(numelements=mp.size(data_structs['jobs_by_id']), maptype='PROBING', loadfactor=0.5)
 
@@ -194,7 +187,6 @@ def req_1(data_structs, n_jobs, Country_Code, exp_lvl):
 
     return length, result_jobs, n_jobs
 
-
 def req_2(data_structs, n_jobs, city):
     jobs_map = data_structs['jobs_by_id'] 
     llave_job = mp.get(jobs_map, city)
@@ -219,21 +211,81 @@ def req_2(data_structs, n_jobs, city):
 
     return lista_jobs_final , lt.size(lista_jobs_final) , count , mp.size(jobs_map)
 
+#TODO
+def req_3(data_structs, e_name, start_d, end_d):
+    start_d = date.fromisoformat(start_d)
+    end_d = date.fromisoformat(end_d)
 
-def req_3(data_structs):
-    """
-    Función que soluciona el requerimiento 3
-    """
-    # TODO: Realizar el requerimiento 3
-    pass
+    jobs_list = mp.newMap(numelements=mp.size(data_structs['jobs_by_id']), maptype='PROBING', loadfactor=0.5)
+    total_jobs = 0
+
+    jobs = me.setKey(data_structs['jobs_by_id'], e_name)
+    for job_id in lt.iterator(jobs):
+        entry = mp.get(data_structs['jobs_by_id'], job_id)
+        job = me.getValue(entry)
+        job_date = date.fromisoformat(job['published_at'])
+        
+        if start_d <= job_date <= end_d and data_structs['company_name'] == e_name:
+            mp.put(jobs_list, job_id, job)
+            total_jobs += 1
+
+            companies = me.keySet(data_structs['company_name'])
+            for company in lt.iterator(companies):
+                entry = mp.get(data_structs['company_name'], company)
+                jobs_list = me.getValue(entry)
+
+    return total_jobs, jobs_list
 
 
-def req_4(data_structs):
-    """
-    Función que soluciona el requerimiento 4
-    """
-    # TODO: Realizar el requerimiento 4
-    pass
+def req_4(data_structs, t_name, start_d, end_d):
+    date_frmt1 = ([int(x) for x in (start_d.split('-'))])
+    date_frmt2 = ([int(x) for x in (end_d.split('-'))])
+    start_d = date(*date_frmt1)
+    end_d = date(*date_frmt2)
+
+    match_list = mp.newMap(numelements=lt.size(data_structs['match_results']), maptype='PROBING', loadfactor=0.5)
+    n_matches = 0
+    country_list = mp.newMap(numelements=10, maptype='CHAINING', loadfactor=0.5)
+    city_list = mp.newMap(numelements=10, maptype='CHAINING', loadfactor=0.5)
+    penalties = 0
+
+    for entry in mp.iterator(data_structs['match_results']):
+        match_id = entry['key']
+        match = entry['value']
+        match_date = date.fromisoformat(match['date'])
+
+        if start_d <= match_date <= end_d and match['tournament'].lower() == t_name.lower():
+            n_matches += 1
+
+            if 'neutral' in match:
+                match.pop('neutral')
+
+            if match['home_score'] == match['away_score']:
+                penalties += 1
+                pos_penalties = mp.get(data_structs['penalties'], match_id)['value']
+                penalty_winner = pos_penalties['winner']
+                match['winner'] = penalty_winner
+            else:
+                match['winner'] = 'Unknown'
+
+            mp.put(match_list, match_id, match)
+
+            if not mp.contains(country_list, match['country']):
+                mp.put(country_list, match['country'], match['country'])
+            if not mp.contains(city_list, match['city']):
+                mp.put(city_list, match['city'], match['city'])
+
+    sorted_matches = [entry['value'] for entry in sorted(mp.iterator(match_list), key=req4_sort_criteria) if entry is not None]
+
+    length = mp.size(match_list)
+    if length > 6:
+        firstelements = sorted_matches[:3]
+        lastelements = sorted_matches[-3:]
+        elements = firstelements + lastelements
+    else:
+        elements = sorted_matches
+
+    return elements, n_matches, mp.size(country_list), mp.size(city_list)
 
 
 def req_5(data_structs):

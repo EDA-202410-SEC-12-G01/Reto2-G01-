@@ -277,12 +277,39 @@ def req_4(data_structs, C_code, start_d, end_d):
     return elements, n_matches, mp.size(country_list), mp.size(city_list)
 
 #TODO
-def req_5(data_structs):
+def req_5(data_structure,C_code,f_inicial,f_final):
     """
     Función que soluciona el requerimiento 5
     """
-    # TODO: Realizar el requerimiento 5
-    pass
+    jobs_map = data_structure['jobs_by_id']
+    jobs = data_structure['jobs_by_id'] 
+    llave_job = mp.get(jobs_map, C_code)
+    country = me.getValue(llave_job)
+    quk.sort(country, compare_goals_jugador_req5)
+    countries = {}
+    lista_countries = lt.newList('ARRAY_LIST')
+    lista_jobs = lt.newList('ARRAY_LIST')
+    for gol in lt.iterator(jobs):
+        llave = ""
+        if gol["date"] >= f_inicial and gol["date"] <= f_final:
+            llave = job["date"]+"-"+job["country_code"]
+            ids = me.getValue(mp.get(jobs,llave))
+            lt.addLast(lista_countries,ids)
+            lt.addLast(lista_jobs,job)
+            countries[ids["tournament"]] = 1
+
+    if lt.size(lista_jobs) > 6:
+        lista_jobs_final = lt.subList(lista_jobs, 1, 3)
+        for job in lt.iterator(lt.subList(lista_jobs,lt.size(lista_jobs)-2 , 3)):
+            lt.addLast(lista_jobs, job)
+        lista_countries_final = lt.subList(lista_countries, 1, 3)
+        for ids in lt.iterator(lt.subList(lista_countries,lt.size(lista_countries)-2 , 3)):
+            lt.addLast(lista_countries, ids)
+    else:
+        lista_jobs_final = lista_jobs
+        lista_countries_final = lista_countries
+
+    return lista_jobs_final,lt.size(lista_jobs),len(countries),mp.size(jobs_map),lista_countries_final
 
 
 def req_6(data_structs):

@@ -211,7 +211,7 @@ def req_2(data_structs, n_jobs, city):
 
     return lista_jobs_final , lt.size(lista_jobs_final) , count , mp.size(jobs_map)
 
-#TODO
+
 def req_3(data_structs, e_name, start_d, end_d):
     start_d = date.fromisoformat(start_d)
     end_d = date.fromisoformat(end_d)
@@ -237,57 +237,46 @@ def req_3(data_structs, e_name, start_d, end_d):
     return total_jobs, jobs_list
 
 
-def req_4(data_structs, t_name, start_d, end_d):
+def req_4(data_structs, C_code, start_d, end_d):
     date_frmt1 = ([int(x) for x in (start_d.split('-'))])
     date_frmt2 = ([int(x) for x in (end_d.split('-'))])
     start_d = date(*date_frmt1)
     end_d = date(*date_frmt2)
 
-    match_list = mp.newMap(numelements=lt.size(data_structs['match_results']), maptype='PROBING', loadfactor=0.5)
+    jobs_list = mp.newMap(numelements=lt.size(data_structs['jobs_by_id']), maptype='PROBING', loadfactor=0.5)
     n_matches = 0
     country_list = mp.newMap(numelements=10, maptype='CHAINING', loadfactor=0.5)
     city_list = mp.newMap(numelements=10, maptype='CHAINING', loadfactor=0.5)
-    penalties = 0
+    count = 0
 
-    for entry in mp.iterator(data_structs['match_results']):
-        match_id = entry['key']
-        match = entry['value']
-        match_date = date.fromisoformat(match['date'])
+    for entry in mp.iterator(data_structs['jobs_by_id']):
+        job_id = entry['key']
+        job = entry['value']
+        job_date = date.fromisoformat(job['date'])
 
-        if start_d <= match_date <= end_d and match['tournament'].lower() == t_name.lower():
+        if start_d <= job_date <= end_d and job['country_code'].lower() == C_code.lower():
             n_matches += 1
 
-            if 'neutral' in match:
-                match.pop('neutral')
+            mp.put(jobs_list, job_id, job)
 
-            if match['home_score'] == match['away_score']:
-                penalties += 1
-                pos_penalties = mp.get(data_structs['penalties'], match_id)['value']
-                penalty_winner = pos_penalties['winner']
-                match['winner'] = penalty_winner
-            else:
-                match['winner'] = 'Unknown'
+            if not mp.contains(country_list, job['country']):
+                mp.put(country_list, job['country'], job['country'])
+            if not mp.contains(city_list, job['city']):
+                mp.put(city_list, job['city'], job['city'])
 
-            mp.put(match_list, match_id, match)
+    sorted_jobs = [entry['value'] for entry in sorted(mp.iterator(jobs_list), key=req4_sort_criteria) if entry is not None]
 
-            if not mp.contains(country_list, match['country']):
-                mp.put(country_list, match['country'], match['country'])
-            if not mp.contains(city_list, match['city']):
-                mp.put(city_list, match['city'], match['city'])
-
-    sorted_matches = [entry['value'] for entry in sorted(mp.iterator(match_list), key=req4_sort_criteria) if entry is not None]
-
-    length = mp.size(match_list)
+    length = mp.size(jobs_list)
     if length > 6:
-        firstelements = sorted_matches[:3]
-        lastelements = sorted_matches[-3:]
+        firstelements = sorted_jobs[:3]
+        lastelements = sorted_jobs[-3:]
         elements = firstelements + lastelements
     else:
-        elements = sorted_matches
+        elements = sorted_jobs
 
     return elements, n_matches, mp.size(country_list), mp.size(city_list)
 
-
+#TODO
 def req_5(data_structs):
     """
     Función que soluciona el requerimiento 5

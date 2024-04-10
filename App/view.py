@@ -26,6 +26,7 @@ import controller
 from DISClib.ADT import list as lt
 from DISClib.ADT import stack as st
 from DISClib.ADT import queue as qu
+from DISClib.ADT import map as mp
 assert cf
 from tabulate import tabulate
 import traceback
@@ -37,6 +38,8 @@ se hace la solicitud al controlador para ejecutar la
 operación solicitada
 """
 
+default_limit = 100000
+sys.setrecursionlimit(default_limit*10000)
 
 def new_controller():
     """
@@ -153,7 +156,9 @@ if __name__ == "__main__":
         if int(inputs) == 1:
             print("Cargando información de los archivos ....\n")
             data = load_data(control)
+            print(mp.get(control["model"]["jobs_by_date"],"2023-08-30T09:00:00.000Z"))
             print(data)
+            
         elif int(inputs) == 2:
             print_req_1(control)
 

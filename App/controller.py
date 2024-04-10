@@ -30,6 +30,9 @@ El controlador se encarga de mediar entre la vista y el modelo.
 """
 csv.field_size_limit(2147483647) 
 
+
+
+
 def new_controller():
     """
     Crea una instancia del modelo
@@ -75,11 +78,12 @@ def load_data(control):
     elif data_size == 6:
         file = "large"
 
+    jobs_by_id = load_job_by_id(data_structs, file)
     jobs_by_date = load_job_by_date(data_structs, file)
     employment_type = load_employment_type(data_structs, file)
     multilocations = load_multilocations(data_structs,file)
     skills = load_skills(data_structs,file)
-    return jobs_by_date,employment_type,multilocations,skills
+    return jobs_by_id,jobs_by_date,employment_type,multilocations,skills
 
 
 def load_job_by_date(data_structs, file):
@@ -88,6 +92,13 @@ def load_job_by_date(data_structs, file):
     for job in input_file:
         model.add_job_by_date(data_structs, job)
     return model.data_size(data_structs["jobs_by_date"])
+
+def load_job_by_id(data_structs, file):
+
+    input_file = csv.DictReader(open(cf.data_dir + f"{file}-jobs.csv", encoding='utf-8'),delimiter=";")
+    for job in input_file:
+        model.add_job_by_id(data_structs, job)
+    return model.data_size(data_structs["jobs_by_id"])
 
 def load_employment_type(data_structs, file):
 

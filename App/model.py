@@ -54,7 +54,8 @@ def new_data_structs(tipo_estructura, factor_carga, num_elementos):
     """
     #TODO: Inicializar las estructuras de datos
     
-    data_struct = {"jobs_by_date":None,
+    data_struct = {"jobs_by_id":None,
+                    "jobs_by_date":None,
                     "employments_types":None,
                     "multilocations":None,
                     "skills":None}
@@ -80,6 +81,7 @@ def new_data_structs(tipo_estructura, factor_carga, num_elementos):
             factor_carga = 0.7
         else: factor_carga = 0.9
         
+    data_struct["jobs_by_id"] = mp.newMap(numelements=num_elementos, maptype=map_type, loadfactor=factor_carga)
     data_struct["jobs_by_date"] = mp.newMap(numelements=num_elementos, maptype=map_type, loadfactor=factor_carga)
     data_struct["employments_types"]  = mp.newMap(numelements=num_elementos, maptype=map_type, loadfactor=factor_carga)
     data_struct["multilocations"]  = mp.newMap(numelements=num_elementos, maptype=map_type, loadfactor=factor_carga)
@@ -90,7 +92,13 @@ def new_data_structs(tipo_estructura, factor_carga, num_elementos):
 ##ADD_DATA##
 def add_job_by_date(data_struct,data):
     job= new_job_by_date(data)
+    print(data["published_at"].split("T")[0])
     mp.put(data_struct["jobs_by_date"],data["published_at"],job)
+    return data_struct
+
+def add_job_by_id(data_struct,data):
+    job= new_job_by_date(data)
+    mp.put(data_struct["jobs_by_id"],data["id"],job)
     return data_struct
 
 def add_employment_type(data_struct,data):
@@ -158,12 +166,33 @@ def data_size(data_structs):
 
 
 
-def req_1(data_structs):
-    """
-    Función que soluciona el requerimiento 1
-    """
-    # TODO: Realizar el requerimiento 1
-    pass
+def req_1(data_structs, n_jobs, Country_Code, exp_lvl):
+    jobs = mp.newMap(numelements=mp.size(data_structs['jobs_by_id']), maptype='PROBING', loadfactor=0.5)
+
+    for job_id in lt.iterator(jobs):
+        entry = mp.get(data_structs['match_results'], job_id)
+        job = me.getValue(entry)
+        
+        if job['experience_level'] == exp_lvl:
+            mp.put(jobs, job_id, job)
+        elif job['country_code'] == Country_Code:
+            mp.put(jobs, job_id, job)
+
+    length = mp.size(jobs)
+    
+    if n_jobs <= length:
+        sub_jobs = [me.getValue(mp.get(jobs, job_id)) for job_id in range(1, n_jobs + 1)]
+    else:
+        sub_jobs = [me.getValue(mp.get(jobs, job_id)) for job_id in lt.iterator(mp.keySet(jobs))]
+
+    if length > 6:
+        first_jobs = sub_jobs[:3]
+        last_jobs = sub_jobs[-3:]
+        result_jobs = first_jobs + last_jobs
+    else:
+        result_jobs = sub_jobs
+
+    return length, result_jobs, n_jobs
 
 
 def req_2(data_structs):
